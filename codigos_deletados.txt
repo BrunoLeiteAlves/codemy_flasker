@@ -1,0 +1,9 @@
+def index():
+    return "<h1>Hello World!</h1>"
+
+#localhost:5000/user/Bruno
+@app.route('/user/<name>')
+def user(name):
+    return "<h1>Hello {}!</h1>".format(name)
+
+

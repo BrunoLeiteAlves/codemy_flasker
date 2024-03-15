@@ -1,0 +1,72 @@
+cria ambiente virtual: python -m venv virt
+//?(no dele): source virt/Scripts/activate
+?(no VSCode): virt\Scripts\activate
+desativar ambiente virtual: deactivate
+mostra coisas instaladas na maquina virtual do Python: pip freeze
+instalar o flask: python.exe -m pip install --upgrade pip
+//criando enviroment "development"(no dele): export FLASK_ENV=development
+//código abaixo era pra não precisar reiniciar pra ver mudanças(não funcionou)
+criando enviroment "development"(VSCode): set FLASK_ENV=development
+criando enviroment "development"(VSCode): $env:FLASK_APP = "home.py"
+
+rodar servidor: flask run
+
+//em vez de ir no link dado vc pode digitar: localhost:5000
+
+rodar sem precisar ficar atualizando o servidor, add código no fim do home.py:
+if __name__ == "__main__":
+    app.run(debug=True)
+
+personalizar página de erro (tipo ir pra uma página que não existe)
+
+pip install flask-wtf
+
+tipos form: https://www.youtube.com/watch?v=GbJPqu0ff9A&t=20m
+# BooleanField
+# DateField
+# DateTimeField
+# DecimalField
+# FileField
+# HiddenField
+# MultipleField
+# FieldField
+# FormField
+# IntegerField
+# PasswordField
+# RadioField
+# SelectField
+# SelectMultipleField
+# SubmitField
+# StringField
+# TextAreaField
+
+## Validators
+# DataRequired
+# Email
+# EqualTo
+# InputRequired
+# IPAddress
+# Length
+# MacAddress
+# NumberRange
+# Optional
+# Regexp
+# URL
+# UUID
+# AnyOf
+# NoneOf
+
+pip install flask-sqlalchemy
+
+#criar database (o dele não funcionou)
+//python
+//from home import db
+
+//db.create_all()
+if __name__ == "__main__":
+    with app.app_context():
+        db.create_all()
+    app.run(debug=True)
+
+#fazer migração (adicionar colunas novas mais facilmente)
+https://www.youtube.com/watch?v=ca-Vj6kwK7M&t=8m38s

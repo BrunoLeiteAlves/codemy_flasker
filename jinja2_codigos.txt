@@ -1,0 +1,33 @@
+coisas usadas no Jinja2 são chamadas filtros(filters):
+safe <- renderiza código html passado por parametro
+striptags <- renderiza código html ignorando códigos html (sem mostrar na tela)
+title
+
+no código: favorite_pizza = ["Pepperoni", "Cheese", "Mushrooms", 41]
+
+for:
+
+{% for topping in favorite_pizza %}
+
+{% endfor %}
+
+elemento especifico:
+{{ favorite_pizza.0 }}
+
+elemento especifico int (funciona!!):
+{{ favorite_pizza.3 + 10}}
+
+if:
+
+{% if %}
+{% endif %}
+
+for e if
+
+{% for topping in favorite_pizza %}
+    {% if topping == 41 %}
+        {{ topping +100}}
+    {% else %}
+        {{ topping }}<br/>
+    {% endif %}
+{% endfor %}
