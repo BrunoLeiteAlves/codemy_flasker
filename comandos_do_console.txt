@@ -72,7 +72,7 @@ if __name__ == "__main__":
 https://www.youtube.com/watch?v=ca-Vj6kwK7M&t=8m38s
 
 #migracao de porra
-$env:FLASK_APP="home.py"
+$env:FLASK_APP="app.py"
 
 flask db migrate -m 'Initial Migration'
 
@@ -130,3 +130,6 @@ echo web: gunicorn app:app > Procfile
 
 heroku login
 heroku create <nome do seu app: codemyflasky> (pede credicard)
+
+depois desses passos é só fazer o commit e push
+no github, ir no "render" e usar seu repositorio.

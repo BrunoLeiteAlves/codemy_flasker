@@ -62,7 +62,15 @@
         </div>
         <div class="col-4">
 
+            {% if current_user.profile_pic %}
+
+            <img src="{{ url_for('static', filename='images/' + current_user.profile_pic)}}" width="200" align="right">
+            
+            {% else %}
+
             <img src="{{ url_for('static', filename='images/image0.jpg')}}" width="200" align="right">
+
+            {% endif %}
             
         </div>
         </div>
@@ -103,6 +111,11 @@
             {{ form.favorite_color.label(class="form-label") }}
 
             {{ form.favorite_color(class="form-control", value=name_to_update.favorite_color) }}
+            <br/>
+
+            {{ form.profile_pic.label(class="form-label") }}
+
+            {{ form.profile_pic(class="form-control", value=name_to_update.profile_pic) }}
             <br/>
             
 

@@ -5,6 +5,9 @@ from flask_migrate import Migrate
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
 from flask_ckeditor import CKEditor
+from werkzeug.utils import secure_filename
+import uuid as uuid
+import os
 
 from webforms import UserForm, NamerForm, PostForm, LoginForm, SearchForm
 
@@ -17,6 +20,9 @@ app.config['SECRET_KEY'] = 'SENFLASK'
 #Iniciando Database
 db = SQLAlchemy(app)
 migrate = Migrate(app, db, render_as_batch=True)
+
+UPLOAD_FOLDER = 'static/images/'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Flask_Login Stuff
 login_manager = LoginManager()
@@ -98,26 +104,45 @@ def dashboard():
         name_to_update.email = request.form['email']
         name_to_update.favorite_color = request.form['favorite_color']
         name_to_update.username = request.form['username']
-        #adicione aqui
-        try:
+
+        # Check for profile pic
+        if request.files['profile_pic']:
+            name_to_update.profile_pic = request.files['profile_pic']
+
+            # Grab Image Name
+            pic_filename = secure_filename(name_to_update.profile_pic.filename)
+            # Set UUID
+            pic_name = str(uuid.uuid1()) + "_" + pic_filename
+            # Save That Image
+            saver = request.files['profile_pic']
+
+            # Change it to a string to save to db
+            name_to_update.profile_pic = pic_name
+            try:
+                db.session.commit()
+                saver.save(os.path.join(app.config['UPLOAD_FOLDER'], pic_name))
+                flash("User Updated Successfully!")
+                return render_template("dashboard.html", 
+                    form=form,
+                    name_to_update=name_to_update)
+            except:
+                flash("Error! Looks like there was a problem...try again!")
+                return render_template("dashboard.html", 
+                    form=form,
+                    name_to_update=name_to_update)
+        else:
             db.session.commit()
-            flash("User Updated Successfully")
-            return render_template("dashboard.html",
-                                   form=form,
-                                   name_to_update = name_to_update,
-                                   id = id)
-        except:
-            flash("Error")
-            return render_template("dashboard.html",
-                                   form=form,
-                                   name_to_update = name_to_update,
-                                   id = id)
+            flash("User Updated Successfully!")
+            return render_template("dashboard.html", 
+                form=form, 
+                name_to_update=name_to_update)
     else:
-        return render_template("dashboard.html",
-                                   form=form,
-                                   name_to_update = name_to_update,
-                                   id = id)
-    #return render_template('dashboard.html')
+        return render_template("dashboard.html", 
+            form=form,
+            name_to_update=name_to_update,
+            id=id)
+
+    return render_template('dashboard.html')
 
 def login():
     form = LoginForm()
@@ -140,7 +165,7 @@ class Posts(db.Model):
 def delete_post(id):
     post_to_delete = Posts.query.get_or_404(id)
     id = current_user.id
-    if id == post_to_delete.poster_id:
+    if id == post_to_delete.poster_id or id == 1:
         try:
             db.session.delete(post_to_delete)
             db.session.commit()
@@ -190,7 +215,7 @@ def edit_post(id):
         
         return redirect(url_for('post', id=post.id))
     
-    if current_user.id == post.poster_id:
+    if current_user.id == post.poster_id or current_user.id == 1:
         form.title.data = post.title
         #form.author.data = post.author
         form.slug.data = post.slug
@@ -248,7 +273,7 @@ class Users(db.Model, UserMixin):
     password_hash = db.Column(db.String(128))
     #users can have many posts
     posts = db.relationship('Posts', backref='poster')
-    
+    profile_pic = db.Column(db.String(), nullable=True)
     @property
     def password(self):
         raise AttributeError('Password is not a readable attribute')
@@ -265,28 +290,33 @@ class Users(db.Model, UserMixin):
         return '<Name %r>' % self.name
 
 @app.route('/delete/<int:id>')
+@login_required
 def delete(id):
-    user_to_delete = Users.query.get_or_404(id)
-    name = None
-    form = UserForm()
-    
-    try:
-        db.session.delete(user_to_delete)
-        db.session.commit()
-        flash("User Deleted Successfully!")
+    if id == current_user.id:
+        user_to_delete = Users.query.get_or_404(id)
+        name = None
+        form = UserForm()
         
-        our_users = Users.query.order_by(Users.date_added)
-        return render_template("add_user.html", 
-                            form=form,
-                            name=name,
-                            our_users=our_users)
-        
-    except:
-        flash("Erro ao deletar usuário")
-        return render_template("add_user.html", 
-                            form=form,
-                            name=name,
-                            our_users=our_users)
+        try:
+            db.session.delete(user_to_delete)
+            db.session.commit()
+            flash("User Deleted Successfully!")
+            
+            our_users = Users.query.order_by(Users.date_added)
+            return render_template("add_user.html", 
+                                form=form,
+                                name=name,
+                                our_users=our_users)
+            
+        except:
+            flash("Erro ao deletar usuário")
+            return render_template("add_user.html", 
+                                form=form,
+                                name=name,
+                                our_users=our_users)
+    else:
+        flash("Você não tem permissão para deletar outros usuários")
+        return redirect(url_for('dashboard'))
 
     
 #Update Database
